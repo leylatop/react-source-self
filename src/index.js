@@ -7,13 +7,17 @@ import ReactDOM from 'react-dom';
 //     </div>
 // )
 // 经过babel转化之后，会转化成下面的代码
-let element = React.createElement('div', {
-    className: 'title',
-    style: {
-        color: 'red'
-    }
-}, React.createElement('span', null, 'hello'), 'world')
-console.log(JSON.stringify(element, null, 2));
+// let element = React.createElement('div', {
+//     className: 'title',
+//     style: {
+//         color: 'red'
+//     }
+// }, React.createElement('span', null, 'hello'), 'world')
+
+function componentFunction(props) {
+	return React.createElement('h1', null, React.createElement('span',null, 'hello,'), props.name)
+}
+let element = React.createElement(componentFunction, {name: 'xiaoqiao'})
 // {
 //     "type": "div",
 //     "key": null,

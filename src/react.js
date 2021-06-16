@@ -11,6 +11,8 @@ function createElement(type, config, children) {
     // 如果参数大于3个，则后面的都是children， 从下标为2的参数开始往后截取
     if(arguments.length > 3) {
         children = Array.prototype.slice.call(arguments, 2).map(wrapToVdom);
+    } else {
+        children = wrapToVdom(children);          //wrapToVdom对字符串和数字进行加工处理
     }
     // 将children放在props中 children放在props中
     // children的值可能是
@@ -19,7 +21,7 @@ function createElement(type, config, children) {
     // 3. undefined
     // 4. null
     // 5. 数组
-    props.children = wrapToVdom(children);      //wrapToVdom对字符串和数字进行加工处理
+    props.children = children;
 
     // {
     //     "type": "div",
