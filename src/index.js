@@ -1,4 +1,4 @@
-import React from './react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 
 // let element = (
@@ -13,11 +13,23 @@ import ReactDOM from 'react-dom';
 //         color: 'red'
 //     }
 // }, React.createElement('span', null, 'hello'), 'world')
-
-function componentFunction(props) {
+// 函数组件
+function ComponentFunction(props) {
 	return React.createElement('h1', null, React.createElement('span',null, 'hello,'), props.name)
 }
-let element = React.createElement(componentFunction, {name: 'xiaoqiao'})
+class ClassComponent extends React.Component {
+	render() {
+		return <div>类组件</div>
+	}
+}
+// 类组件
+let element1 = <ComponentFunction name="qiao"/>;
+let element2 = <ClassComponent name="qiao"/>;
+// let element2 = React.createElement(ClassComponent, {name: 'qiao'})
+
+
+console.log(element1);
+console.log(element2);
 // {
 //     "type": "div",
 //     "key": null,
@@ -42,4 +54,4 @@ let element = React.createElement(componentFunction, {name: 'xiaoqiao'})
 //       ]
 //     },
 // }
-ReactDOM.render(element, document.getElementById('root'))
+ReactDOM.render(element2, document.getElementById('root'))
