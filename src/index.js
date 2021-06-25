@@ -1,5 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from './react';
+import ReactDOM from './react-dom';
 
 // let element = (
 //     <div className="title" style={{color: 'red'}}>
@@ -17,19 +17,23 @@ import ReactDOM from 'react-dom';
 function ComponentFunction(props) {
 	return React.createElement('h1', null, React.createElement('span',null, 'hello,'), props.name)
 }
+
+console.log(React.Component);
 class ClassComponent extends React.Component {
 	render() {
 		return <div>类组件</div>
 	}
 }
+console.log(React.Component);
+console.log(ClassComponent);
 // 类组件
 let element1 = <ComponentFunction name="qiao"/>;
 let element2 = <ClassComponent name="qiao"/>;
 // let element2 = React.createElement(ClassComponent, {name: 'qiao'})
 
 
-console.log(element1);
-console.log(element2);
+// console.log(element1);
+// console.log(element2);
 // {
 //     "type": "div",
 //     "key": null,
