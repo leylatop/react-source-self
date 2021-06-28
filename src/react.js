@@ -1,4 +1,5 @@
 import { wrapToVdom } from "./utils";
+import {Component} from './Component';
 
 // 创建虚拟节点
 // 第一个参数，dom元素的类型
@@ -52,7 +53,8 @@ function createElement(type, config, children) {
 }
 
 const React = {
-    createElement
+    createElement,
+    Component
 }
 
 export default React;
