@@ -1,11 +1,3 @@
-/*
- * @Author: your name
- * @Date: 2021-06-25 21:50:25
- * @LastEditTime: 2021-06-25 23:06:13
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: \react-source-self\src\react-dom.js
- */
 import {REACT_TEXT} from './constants'
 
 // 把虚拟dom转化成真实dom并且插入到容器中
@@ -43,7 +35,7 @@ function createDOM(vdom) {
 
 	if(props.children) {
 		// 此时dom是一个真实的dom
-
+		
 		// 如果只有一个儿子，并且儿子是对象
 		if(typeof props.children === 'object' && props.children.type) {
 			render(props.children, dom);
@@ -52,6 +44,8 @@ function createDOM(vdom) {
 		}
 	}
 	// 让虚拟dom的 dom属性指向它自己的真实dom
+	// 只有原生的dom元素才会被赋dom属性；
+	// 函数组件和类组件已经在上面执行mountClassComponent和mountFunctionComponent，递归到真实dom的时候，才会被赋值
 	vdom.dom = dom;
 	return dom;
 }
@@ -62,13 +56,19 @@ function mountClassComponent(vdom) {
 	let classInstance = new type(props);
 	// 执行render函数，得到组件内部的reactvdom
 	let renderVdom = classInstance.render();
+
+	// 在挂载时，将执行render函数后真实dom对应的虚拟dom挂载到类组件的实例上；
+	classInstance.oldRenderVdom = vdom.oldRenderVdom = renderVdom;
 	return createDOM(renderVdom);
 }
 
 // 解析函数组件
 function mountFunctionComponent(vdom) {
 	let {type, props} = vdom;
-	let renderVdom = new type(props);	// 返回组件内部的reactvdom
+	let renderVdom = type(props);	// 执行函数，返回组件内部的reactvdom
+
+	// 在挂载时，将执行函数组件后真实dom对应的虚拟dom挂载到类组件的实例上；
+	vdom.oldRenderVdom = renderVdom;
 	return createDOM(renderVdom);	// 将vdom转化成真实dom返回
 
 }
@@ -91,10 +91,35 @@ function updateProps(dom, oldProps, newProps) {
 			for(let attr in styleObj) {
 				dom.style[attr] = styleObj[attr]; 
 			}
-		} else {
+		} else if(key.startsWith('on')) {	// 对事件绑定进行单独处理(onClick) dom.onclick=handleClick
+			dom[key.toLocaleLowerCase()] = newProps[key];
+		} else{
 			dom[key] = newProps[key];
 		}
 	}
+}
+
+
+// 根据vdom获取真实dom
+export function findDOM(vdom) {
+	let {type} = vdom;
+	let dom;
+	// 对vdom的type进行判断，如果type是类组件或函数组件，它们没有真实dom，只能取render或者执行函数组件的虚拟dom对应的真实dom
+	if(typeof type === 'function') {	// vdom是组件
+		dom = findDOM(vdom.oldRenderVdom); // 递归获取真实dom，不可以直接使用.dom获取，避免组件套组件的情况， 通过组件的虚拟dom，获取内层的虚拟dom，再获取虚拟dom身上的dom属性
+	} else {
+		dom = vdom.dom;
+	}
+	return dom;
+}
+
+// 比较新旧虚拟dom找出差异，更新到真实dom上
+export function compareTwoVdom(parentDOM, oldVdom, newVdom) {
+	let oldDOM = findDOM(oldVdom);
+	let newDOM = createDOM(newVdom);
+	// TODO... 
+	// 先强行替换，后续进行diff
+	parentDOM.replaceChild(newDOM, oldDOM);
 }
 
 const ReactDOM = {
