@@ -1,4 +1,5 @@
-import {REACT_TEXT} from './constants'
+import {REACT_TEXT} from './constants';
+import {addEvent} from './event';
 
 // 把虚拟dom转化成真实dom并且插入到容器中
 function render(vdom, container) {
@@ -92,7 +93,8 @@ function updateProps(dom, oldProps, newProps) {
 				dom.style[attr] = styleObj[attr]; 
 			}
 		} else if(key.startsWith('on')) {	// 对事件绑定进行单独处理(onClick) dom.onclick=handleClick
-			dom[key.toLocaleLowerCase()] = newProps[key];
+			// dom[key.toLocaleLowerCase()] = newProps[key];
+			addEvent(dom, key.toLocaleLowerCase(), newProps[key]);	// 不再将事件直接绑定到dom上，而是通过addEvent事件保存事件
 		} else{
 			dom[key] = newProps[key];
 		}

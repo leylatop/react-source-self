@@ -1,4 +1,16 @@
 import { findDOM, compareTwoVdom } from './react-dom';
+export let updateQueue = {
+    isBatchingUpdate: false,    // 通过此变量来控制是否批量更新 React15
+    updaters: [],   // 存放setState时的更新实例
+    batchUpdate() { // 批量更新
+        for(let updater of updateQueue.updaters) {
+            updater.updateComponent();
+        }
+        updateQueue.isBatchingUpdate = false;
+        updateQueue.updaters.length = 0;
+    },
+}
+
 // 负责组件的更新调度
 class Updater {
     constructor(classInstance) {
@@ -18,16 +30,22 @@ class Updater {
     }
 
     // 触发更新（无论是状态还是属性发生变化，都会执行此方法、props、需不需要更新）
-    emitUpdate() {
-        // 后期会在这里加判断，判断批量更新的变量；如果是异步就先不更新，如果是同步就直接更新
-        this.updateComponent();
+    emitUpdate(nextProps) {
+        this.nextProps = nextProps; // 父组件更新的话，子组件可能会传入一个新的属性对象，所以先存一下
+        // 如果当前处于批量更新模式，那么就把updater实例添加到updateQueue的队列里面
+        if (updateQueue.isBatchingUpdate) {
+            updateQueue.updaters.push(this);
+        } else {
+            this.updateComponent();
+        }
     }
 
     // 更新组件
     updateComponent() {
-        let { classInstance, pendingStates } = this;
-        if (pendingStates.length > 0) {  // 如果有等待更新的话
-            shouldUpdate(classInstance, this.getState());   // 调用shouldUpdate进行更新之前，先用getState获取最新的状态
+        let { classInstance, pendingStates, nextProps } = this;
+        // 如果属性发生了变化，或者有等待更新的状态
+        if (nextProps || pendingStates.length > 0) {  // 如果有等待更新的状态的话
+            shouldUpdate(classInstance, nextProps, this.getState());   // 调用shouldUpdate进行更新之前，先用getState获取最新的状态
         }
     }
 
@@ -54,7 +72,7 @@ class Updater {
 
 // 第一个参数组件实例
 // 第二个参数最新的state
-function shouldUpdate(classInstance, nextState) {
+function shouldUpdate(classInstance, nextProps, nextState) {
     classInstance.state = nextState;    // 修改实例的状态
     classInstance.forceUpdate();    // 调用类组件的updateComponent方法进行更新 
 }
