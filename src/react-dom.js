@@ -11,7 +11,7 @@ function render(vdom, container) {
 
 // 创建真实dom，并且返回
 function createDOM(vdom) {
-	let {type, props} = vdom;
+	let {type, props, ref} = vdom;
 	let dom;	// 真实dom
 	// 如果节点是文本节点，就用createTextNode方法创建节点
 	if(type === REACT_TEXT) {
@@ -48,6 +48,10 @@ function createDOM(vdom) {
 	// 只有原生的dom元素才会被赋dom属性；
 	// 函数组件和类组件已经在上面执行mountClassComponent和mountFunctionComponent，递归到真实dom的时候，才会被赋值
 	vdom.dom = dom;
+	// 如果存在ref的话，让ref.current指向真实dom的实例
+	if(ref) {
+		ref.current = dom;
+	}
 	return dom;
 }
 

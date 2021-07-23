@@ -7,7 +7,20 @@ import {Component} from './Component';
 // 第三个参数，子元素
 // 如果有3+个参数，后面的参数都是子元素
 function createElement(type, config, children) {
-    // 展开config
+    // ref和key较为特殊
+    // ref是用来获取虚拟dom实例的
+    // key是用来标识唯一的
+    let ref, key;
+    if(config) {
+        delete config.__source;
+        delete config.__self;
+        ref = config.ref;
+        delete config.ref;
+        key = config.key;
+        delete config.key;
+    }
+
+    // 展开config props中不包含ref和key，ref和key将会与props同级别
     let props = {...config};
     // 如果参数大于3个，则后面的都是children， 从下标为2的参数开始往后截取
     if(arguments.length > 3) {
@@ -49,12 +62,22 @@ function createElement(type, config, children) {
     return {
         type,
         props,
+        ref, 
+        key
+    }
+}
+
+// 创建一个ref，ref是一个对象
+function createRef() {
+    return {
+        current: null,
     }
 }
 
 const React = {
     createElement,
-    Component
+    Component,
+    createRef
 }
 
 export default React;
