@@ -15,7 +15,7 @@ function createElement(type, config, children) {
         delete config.__source;
         delete config.__self;
         ref = config.ref;
-        delete config.ref;
+        // delete config.ref;
         key = config.key;
         delete config.key;
     }
@@ -68,16 +68,28 @@ function createElement(type, config, children) {
 }
 
 // 创建一个ref，ref是一个对象
+// current的熟悉值 是对应的真实dom的实例
 function createRef() {
     return {
         current: null,
     }
 }
 
+// ref转化，将函数组件转化成包一层类组件，因为只有类组件才可以添加ref
+function forwardRef(FunctionComponent) {
+    return class extends Component {
+        render() {
+            // 将props和ref改回去
+            // this指向调用它的对象
+            return FunctionComponent(this.props, this.props.ref); // 返回函数组件的调用结果
+        }
+    }
+}
 const React = {
     createElement,
     Component,
-    createRef
+    createRef,
+    forwardRef
 }
 
 export default React;

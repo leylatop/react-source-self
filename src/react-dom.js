@@ -19,7 +19,7 @@ function createDOM(vdom) {
 	} else if(typeof type === 'function') { // 函数组件或类组件
 		// 这里直接return真实dom，是因为函数组件的props是传参使用的，没有必要挂载到真实dom上面；也没有儿子
 		// 所以就不需要走下面updateProps和reconcileChildren的流程
-		console.log(type);
+
 		// 函数组件
 		if(type.isReactComponent) {		// 说明是个类组件
 			return mountClassComponent(vdom);
@@ -57,13 +57,28 @@ function createDOM(vdom) {
 
 // 解析类组件
 function mountClassComponent(vdom) {
-	let {type, props} = vdom;	// 组件是类组件，所以需要实例化
+	let {type, props, ref} = vdom;	// 组件是类组件，所以需要实例化
 	let classInstance = new type(props);
+	// render之前执行componentWillMount
+	if(classInstance.componentWillMount) {
+		classInstance.componentWillMount();
+	}
+
 	// 执行render函数，得到组件内部的reactvdom
 	let renderVdom = classInstance.render();
 
+	// render之后执行componentWillMount
+	if(classInstance.componentDidMount) {
+		classInstance.componentDidMount();
+	}
+
 	// 在挂载时，将执行render函数后真实dom对应的虚拟dom挂载到类组件的实例上；
 	classInstance.oldRenderVdom = vdom.oldRenderVdom = renderVdom;
+
+	// 如果类组件有ref，就让ref的current指向类组件的实例
+	if(ref) {
+		ref.current = classInstance;
+	}
 	return createDOM(renderVdom);
 }
 
