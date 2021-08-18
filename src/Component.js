@@ -73,8 +73,25 @@ class Updater {
 // 第一个参数组件实例
 // 第二个参数最新的state
 function shouldUpdate(classInstance, nextProps, nextState) {
-    classInstance.state = nextState;    // 修改实例的状态
-    classInstance.forceUpdate();    // 调用类组件的updateComponent方法进行更新 
+    let willUpdate = true;  // 默认shouldupdate是要更新的
+    // 如果shouldComponentUpdate执行结果为false，将willUpdate置为false
+    if(classInstance.shouldComponentUpdate && !classInstance.shouldComponentUpdate(nextProps, nextState)) {
+        willUpdate = false;
+    }
+
+    // 更新之前执行componentWillUpdate
+    if(willUpdate && classInstance.componentWillUpdate) {
+        classInstance.componentWillUpdate();
+    }
+
+    // 无论要不要更新试图，都要将最新的props和state赋给实例
+    if(nextProps) classInstance.props = nextProps;  // 更新props
+    classInstance.state = nextState;    // 修改实例的状态 nextState永远指向最新的状态
+
+    // 只有在willUpdate为true的时候，才更新
+    if(willUpdate) {
+        classInstance.forceUpdate();    // 调用类组件的updateComponent方法进行更新 
+    }
 }
 
 export class Component {
@@ -109,6 +126,11 @@ export class Component {
 
         compareTwoVdom(oldDOM.parentNode, oldRenderVdom, newRenderVdom);   // 比较新老vdom，并且将计算结果渲染到真实dom
         this.oldRenderVdom = newRenderVdom; // 更新完毕后，将新的vom赋给老的vdom，方便下一次进行diff
+
+        // 强制更新组件完成后，调用实例的componentDiaUpdate方法
+        if(this.componentDidUpdate) {
+            this.componentDidUpdate(this.props, this.state);
+        }
     }
 }
 // 在Component的父级标明这是一个react类组件

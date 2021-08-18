@@ -3,6 +3,12 @@ import {addEvent} from './event';
 
 // 把虚拟dom转化成真实dom并且插入到容器中
 function render(vdom, container) {
+	// {
+	// 	key: undefined
+	// 	props: {children: undefined}
+	// 	ref: undefined
+	// 	type: class 
+	// }
 	// 1. 根据虚拟dom转化成真实dom
 	const dom = createDOM(vdom);
 	container.appendChild(dom)
@@ -58,7 +64,12 @@ function createDOM(vdom) {
 // 解析类组件
 function mountClassComponent(vdom) {
 	let {type, props, ref} = vdom;	// 组件是类组件，所以需要实例化
-	let classInstance = new type(props);
+
+	// 若有默认属性，需要与传入的属性进行合并
+	let defaultProps = type.defaultProps || {};
+	let componentProps = {...defaultProps, ...props}
+
+ 	let classInstance = new type(componentProps);
 	// render之前执行componentWillMount
 	if(classInstance.componentWillMount) {
 		classInstance.componentWillMount();
