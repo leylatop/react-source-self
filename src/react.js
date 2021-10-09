@@ -85,11 +85,19 @@ function forwardRef(FunctionComponent) {
         }
     }
 }
+let Children = {
+    forEach(children, handler) {
+        // 如果children是数组直接使用children；如果 children 不是数组（字符串，null等），就把它包装成数组；然后再使用forEach方法进行循环
+        children = Array.isArray(children) ? children : [ children ]
+        children.forEach(handler)
+    }
+}
 const React = {
     createElement,
     Component,
     createRef,
-    forwardRef
+    forwardRef,
+    Children
 }
 
 export default React;
