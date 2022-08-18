@@ -21,7 +21,7 @@ function createDOM(vdom) {
 		// if (type.isReactComponent) { // 说明是个类组件
 		// 	return mountClassComponent(vdom);
 		// } else { // 说明是函数组件
-		// 	return mountFunctionComponent(vdom);
+			return mountFunctionComponent(vdom);
 		// }
 	} else {
 		dom = document.createElement(type)
@@ -97,6 +97,12 @@ function renconcileChildren(childrenVdom, parentVdom) {
 		let childVdom = childrenVdom[i];
 		mount(childVdom, parentVdom)
 	}
+}
+
+function mountFunctionComponent(vdom) {
+  const { type, props } = vdom
+  const renderVdom = type(props)
+  return createDOM(renderVdom)
 }
 
 export default createDOM

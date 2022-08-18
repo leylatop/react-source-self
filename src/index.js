@@ -1,6 +1,11 @@
 import React from './react/index'
 import ReactDOM from './react-dom/index'
+const FunctionComponent = (props) => {
+  console.log(props)
+  const { name} = props
+  return <h1 className='hello-h1' style={{ color: 'red' }}> {name}</h1>
+}
 
-const h1 = <h1 className='hello-h1' style={{ color: 'red' }}> hello</h1>
-console.log(h1);
-ReactDOM.render(h1, document.getElementById('root'))
+const ele = <FunctionComponent name="xiaoqiao" title="hhh"/>
+console.log(ele)
+ReactDOM.render(ele, document.getElementById('root'))
