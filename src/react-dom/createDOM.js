@@ -18,11 +18,11 @@ function createDOM(vdom) {
 		// 所以就不需要走下面 updateProps 和reconcileChildren的流程
 
 		// 函数组件
-		// if (type.isReactComponent) { // 说明是个类组件
-		// 	return mountClassComponent(vdom);
-		// } else { // 说明是函数组件
+		if (type.isReactComponent) { // 说明是个类组件
+			return mountClassComponent(vdom);
+		} else { // 说明是函数组件
 			return mountFunctionComponent(vdom);
-		// }
+		}
 	} else {
 		dom = document.createElement(type)
 	};
@@ -100,9 +100,16 @@ function renconcileChildren(childrenVdom, parentVdom) {
 }
 
 function mountFunctionComponent(vdom) {
-  const { type, props } = vdom
-  const renderVdom = type(props)
+  const { type: FunctionComponent, props } = vdom
+  const renderVdom = FunctionComponent(props)
   return createDOM(renderVdom)
+}
+
+function mountClassComponent(vdom) {
+  const { type: ClassComponent, props } = vdom
+	const classInstance = new ClassComponent(props)
+	const renderVdom = classInstance.render()
+	return createDOM(renderVdom)
 }
 
 export default createDOM
