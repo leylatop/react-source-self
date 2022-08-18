@@ -1,9 +1,28 @@
 import React from './react/index'
 import ReactDOM from './react-dom/index'
+
+// import React from 'react'
+// import ReactDOM from 'react-dom'
+
 class ClassComponent extends React.Component {
-  render () {
-    const {name} = this.props
-    return <h1 className='hello-h1' style={{ color: 'red' }}> {name}</h1>
+   state = {
+    number: 0
+  }
+
+  addCounter = () => {
+    this.setState({
+      number: this.state.number + 1
+    })
+  }
+
+  render() {
+    console.log(this.state)
+    return (
+      <div>
+        <p>{this.state.number}</p>
+        <button onClick={this.addCounter}>add</button>
+      </div>
+    )
   }
 }
 

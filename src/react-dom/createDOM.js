@@ -73,7 +73,7 @@ function updateProps(dom, oldProps = {}, newProps = {}) {
 		} 
 		//2.对事件属性，进行单独处理，即事件绑定(onClick) dom.onclick=handleClick
 		else if (key.startsWith('on')) {
-			// dom[key.toLocaleLowerCase()] = newProps[key];
+			dom[key.toLocaleLowerCase()] = newProps[key];
 			// 废弃上面那种写法；不再将事件直接绑定到dom上，而是通过addEvent事件保存事件
 			// addEvent(dom, key.toLocaleLowerCase(), newProps[key]);
 		}
