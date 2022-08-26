@@ -102,6 +102,8 @@ function renconcileChildren(childrenVdom, parentVdom) {
 function mountFunctionComponent(vdom) {
   const { type: FunctionComponent, props } = vdom
   const renderVdom = FunctionComponent(props)
+	// 把本次的renderVdom放到vdom上
+	vdom.oldRenderVdom = renderVdom
   return createDOM(renderVdom)
 }
 
@@ -109,6 +111,9 @@ function mountClassComponent(vdom) {
   const { type: ClassComponent, props } = vdom
 	const classInstance = new ClassComponent(props)
 	const renderVdom = classInstance.render()
+	// 把本次的renderVdom放到vdom上
+	classInstance.oldRenderVdom = renderVdom
+	vdom.classInstance = classInstance
 	return createDOM(renderVdom)
 }
 

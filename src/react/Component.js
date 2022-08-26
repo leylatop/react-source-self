@@ -1,3 +1,5 @@
+import { compareTwoVdom } from '../react-dom/compareTwoVdom';
+import { findDOM } from '../react-dom/findDOM'
 import { Updater } from './Updater'
 
 export default class Component {
@@ -15,6 +17,11 @@ export default class Component {
   }
 
   forceUpdate = () => {
-    console.log('forceUpdate', this.state)
+    const oldRenderVdom = this.oldRenderVdom
+    const newRenderVdom = this.render()
+    const parentNode = findDOM(oldRenderVdom)?.parentNode
+    if(!parentNode) return
+    compareTwoVdom(parentNode, oldRenderVdom, newRenderVdom)
+    this.oldRenderVdom = newRenderVdom
   }
 }
