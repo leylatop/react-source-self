@@ -1,3 +1,15 @@
+export let updateQueue = {
+  isBatchingUpdate: false,    // 通过此变量来控制是否批量更新 React15
+  updaters: new Set(),   // 存放setState时的更新实例
+  batchUpdate() { // 批量更新
+    updateQueue.isBatchingUpdate = false;
+    for(let updater of updateQueue. updaters) {
+        updater.updateComponent();
+    }
+    updateQueue.updaters.clear();
+  },
+}
+
 export class Updater {
   constructor(classInstance) {
     this.classInstance = classInstance
@@ -10,7 +22,11 @@ export class Updater {
   }
 
   emitUpdate = () => {
-    this.updateComponent()
+    if(updateQueue.isBatchingUpdate) {
+      updateQueue.updaters.add(this)
+    } else {
+      this.updateComponent()
+    }
   }
 
   updateComponent = () => {

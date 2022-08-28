@@ -10,13 +10,19 @@ class ClassComponent extends React.Component {
   }
 
   addCounter = () => {
-    this.setState({
-      number: this.state.number + 1
-    })
+    this.setState({ number: this.state.number + 1  })
+    console.log(this.state)
+    this.setState({ number: this.state.number + 1  })
+    console.log(this.state)
+    setTimeout(() => {
+      this.setState({ number: this.state.number + 1  })
+      console.log(this.state)
+      this.setState({ number: this.state.number + 1  })
+      console.log(this.state)
+    }, 0);
   }
 
   render() {
-    console.log(this.state)
     return (
       <div>
         <p>{this.state.number}</p>

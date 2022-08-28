@@ -1,6 +1,6 @@
 import { mount } from "./render";
 import {REACT_TEXT} from '../react/constants/index'
-// import { addEvent } from './event'
+import { addEvent } from './event'
 
 // 创建真实dom，并且返回
 function createDOM(vdom) {
@@ -73,9 +73,10 @@ function updateProps(dom, oldProps = {}, newProps = {}) {
 		} 
 		//2.对事件属性，进行单独处理，即事件绑定(onClick) dom.onclick=handleClick
 		else if (key.startsWith('on')) {
-			dom[key.toLocaleLowerCase()] = newProps[key];
+			// dom[key.toLocaleLowerCase()] = newProps[key];
 			// 废弃上面那种写法；不再将事件直接绑定到dom上，而是通过addEvent事件保存事件
-			// addEvent(dom, key.toLocaleLowerCase(), newProps[key]);
+			// 原因：通过事件劫持，添加isBatchingUpdate的标识
+			addEvent(dom, key.toLocaleLowerCase(), newProps[key]);
 		}
 		// 3. 普通属性（虚拟dom属性和真实属性的dom属性命名相同，都是驼峰式写法）
 		else {
