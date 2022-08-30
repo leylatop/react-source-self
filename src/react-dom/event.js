@@ -49,10 +49,36 @@ function dispatchEvent(event) {
 // 在源码中此处做了一些浏览器兼容的视频
 // 比如阻止默认事件不同浏览器有不同表现
 function createSyntheticEvent(event) {
-    let syntheticEvent = {};
-    for(let key in event) {
-        syntheticEvent[key] = event[key];
+  let syntheticEvent = {};
+  for(let key in event) {
+    syntheticEvent[key] = event[key];
+  }
+  syntheticEvent.nativeEvent = event
+  syntheticEvent.isDefaultPrevent = false
+  syntheticEvent.preventDefault = preventDefault
+  syntheticEvent.isPropagationStopped = false
+  syntheticEvent.stopPropagation = stopPropagation
+  return syntheticEvent;
+}
 
-    }
-    return syntheticEvent;
+// 阻止默认事件
+function preventDefault () {
+  this.isDefaultPrevent = true
+  const event = this.nativeEvent
+  if(event.preventDefault) {
+    event.preventDefault()
+  } else {
+    event.returnValue = false
+  }
+}
+
+// 阻止冒泡
+function stopPropagation() {
+  this.isPropagationStopped = true
+  const event = this.nativeEvent
+  if(event.stopPropagation) {
+    event.stopPropagation()
+  } else {
+    event.cancelBubble = false
+  }
 }
