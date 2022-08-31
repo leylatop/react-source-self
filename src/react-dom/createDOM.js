@@ -1,5 +1,5 @@
 import { mount } from "./render";
-import {REACT_TEXT} from '../react/constants/index'
+import {REACT_FORWORD_REF, REACT_TEXT} from '../react/constants/index'
 import { addEvent } from './event'
 
 // 创建真实dom，并且返回
@@ -10,8 +10,10 @@ function createDOM(vdom) {
 		ref
 	} = vdom;
 	let dom; // 真实dom
-	// 如果节点是文本节点，就用createTextNode方法创建节点
-	if (type === REACT_TEXT) {
+
+	if(type && type.$$typeof === REACT_FORWORD_REF) { // 如果type 的 $$typeof 属性为 REACT_FORWORD_REF，则渲染forward转发的组件
+		return mountForwordComponent(vdom)
+	} else if (type === REACT_TEXT) { // 如果节点是文本节点，就用createTextNode方法创建节点
 		dom = document.createTextNode(props.content);
 	} else if (typeof type === 'function') { // 函数组件或类组件
 		// 这里直接return真实dom，是因为函数组件的props是传参使用的，没有必要挂载到真实dom上面；也没有儿子
@@ -118,6 +120,29 @@ function mountClassComponent(vdom) {
 	// 把本次的renderVdom放到vdom上
 	classInstance.oldRenderVdom = renderVdom
 	vdom.classInstance = classInstance
+	return createDOM(renderVdom)
+}
+
+/**
+ * 
+ * @param {*} vdom 
+ * vdom= {
+ * type: { $$typeof: REACT_FORWORD_REF, render: FunctionComponent}
+ * props: {}
+ * ref: {}
+ * }
+ */
+function mountForwordComponent(vdom) {
+	const { type, props, ref } = vdom
+	const renderVdom = type.render(props, ref) // 调用原函数组件，将props和ref作为参数传递过去
+	// renderVdom结构：
+	// $$type: Symbol(react.element)
+	// key: undefined
+	// props: {ref: {…}, children: undefined, onClick: ƒ}
+	// ref: {current: null}
+	// type: "input"
+	vdom.oldRenderVdom = renderVdom
+	// 创建完 renderVdom 的真实dom后，renderVdom.ref 就拥有了值
 	return createDOM(renderVdom)
 }
 
