@@ -10,8 +10,21 @@ class ClassComponent extends React.Component {
   }
 
   addCounter = (event) => {
-    event.stopPropagation()
     this.setState({ number: this.state.number + 1  })
+    // console.log(this.state)
+    // this.setState({ number: this.state.number + 1  })
+    // console.log(this.state)
+    // setTimeout(() => {
+    //   this.setState({ number: this.state.number + 1  })
+    //   console.log(this.state)
+    //   this.setState({ number: this.state.number + 1  })
+    //   console.log(this.state)
+    // }, 0);
+  }
+
+  handleParentClick = (event) => {
+    event.stopPropagation()
+    console.log('handleParentClick')
     console.log(this.state)
     this.setState({ number: this.state.number + 1  })
     console.log(this.state)
@@ -23,14 +36,16 @@ class ClassComponent extends React.Component {
     }, 0);
   }
 
-  handleDivClick = () => {
-    console.log('handleDivClick')
+  handleGrandParentClick = () => {
+    console.log('handleGrandParentClick')
   }
   render() {
     return (
-      <div onClick={this.handleDivClick}>
-        <p>{this.state.number}</p>
-        <button onClick={this.addCounter}>add</button>
+      <div onClick={this.handleGrandParentClick}>
+        <div onClick={this.handleParentClick}>
+          <p>{this.state.number}</p>
+          <button onClick={this.addCounter}>add</button>
+        </div>
       </div>
     )
   }
