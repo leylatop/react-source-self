@@ -113,6 +113,7 @@ function mountFunctionComponent(vdom) {
 function mountClassComponent(vdom) {
   const { type: ClassComponent, props, ref } = vdom
 	const classInstance = new ClassComponent(props)
+	if(classInstance.componentWillMount) classInstance.componentWillMount()
 	const renderVdom = classInstance.render()
 	// 如果组件上有ref属性，就将实例本身赋给该类组件的ref
 	if(ref) ref.current = classInstance
@@ -120,7 +121,9 @@ function mountClassComponent(vdom) {
 	// 把本次的renderVdom放到vdom上
 	classInstance.oldRenderVdom = renderVdom
 	vdom.classInstance = classInstance
-	return createDOM(renderVdom)
+	const dom = createDOM(renderVdom)
+	if(classInstance.componentDidMount) classInstance.componentDidMount()
+	return dom
 }
 
 /**
