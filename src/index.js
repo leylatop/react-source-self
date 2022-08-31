@@ -9,7 +9,8 @@ class ClassComponent extends React.Component {
     number: 0
   }
 
-  addCounter = () => {
+  addCounter = (event) => {
+    event.stopPropagation()
     this.setState({ number: this.state.number + 1  })
     console.log(this.state)
     this.setState({ number: this.state.number + 1  })
@@ -22,9 +23,12 @@ class ClassComponent extends React.Component {
     }, 0);
   }
 
+  handleDivClick = () => {
+    console.log('handleDivClick')
+  }
   render() {
     return (
-      <div>
+      <div onClick={this.handleDivClick}>
         <p>{this.state.number}</p>
         <button onClick={this.addCounter}>add</button>
       </div>

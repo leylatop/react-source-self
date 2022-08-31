@@ -19,7 +19,7 @@ export function addEvent(dom, eventType, handler) {
     // 判断document上有没有挂载相同类型的函数，如果已经挂载过就不要再进行绑定了，不然会被覆盖
     // 点击的时候会执行dispatchEvent
     if (!document[eventType]) {
-        document[eventType] = dispatchEvent;
+      document[eventType] = dispatchEvent;
     }
 }
 
@@ -35,12 +35,16 @@ function dispatchEvent(event) {
     // 基于原来的event创建一个合成事件对象
     let syntheticEvent = createSyntheticEvent(event);
 
+    let currentTarget = target
     // 模拟事件冒泡的过程
-    while (target) {
-        let { store } = target;   //在addEvent阶段时，将store作为属性传给了dom，所以target上面也会有target属性
-        let handler = store && store[eventType];    //获取handler事件
-        handler && handler.call(target, syntheticEvent);    // 执行handler
-        target = target.parentNode; // 执行完当前dom之后，将target置为父节点，模拟事件冒泡
+    while (currentTarget) {
+      let { store } = currentTarget;   //在addEvent阶段时，将store作为属性传给了dom，所以target上面也会有target属性
+      let handler = store && store[eventType];    //获取handler事件
+      handler && handler.call(currentTarget, syntheticEvent);    // 执行handler
+      if(syntheticEvent.isPropagationStopped) { // 阻止冒泡
+        break
+      }
+      currentTarget = currentTarget.parentNode; // 执行完当前dom之后，将target置为父节点，模拟事件冒泡
     }
     
     updateQueue.batchUpdate();  //进行批量更新
