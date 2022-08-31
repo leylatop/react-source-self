@@ -3,49 +3,26 @@ import ReactDOM from './react-dom/index'
 
 // import React from 'react'
 // import ReactDOM from 'react-dom'
-
-class ClassComponent extends React.Component {
-   state = {
-    number: 0
-  }
-
-  addCounter = (event) => {
-    this.setState({ number: this.state.number + 1  })
-    // console.log(this.state)
-    // this.setState({ number: this.state.number + 1  })
-    // console.log(this.state)
-    // setTimeout(() => {
-    //   this.setState({ number: this.state.number + 1  })
-    //   console.log(this.state)
-    //   this.setState({ number: this.state.number + 1  })
-    //   console.log(this.state)
-    // }, 0);
-  }
-
-  handleParentClick = (event) => {
-    event.stopPropagation()
-    console.log('handleParentClick')
-    console.log(this.state)
-    this.setState({ number: this.state.number + 1  })
-    console.log(this.state)
-    setTimeout(() => {
-      this.setState({ number: this.state.number + 1  })
-      console.log(this.state)
-      this.setState({ number: this.state.number + 1  })
-      console.log(this.state)
-    }, 0);
-  }
-
-  handleGrandParentClick = () => {
-    console.log('handleGrandParentClick')
+class UserName extends React.Component {
+  input = React.createRef()
+  focus = () => {
+    this.input.current.focus()
   }
   render() {
+    return <input ref={this.input} onClick={this.focus}></input>
+  }
+}
+class ClassComponent extends React.Component {
+  usernameRef = React.createRef()
+  focus = (event) => {
+    this.usernameRef.current.focus()
+  }
+
+  render() {
     return (
-      <div onClick={this.handleGrandParentClick}>
-        <div onClick={this.handleParentClick}>
-          <p>{this.state.number}</p>
-          <button onClick={this.addCounter}>add</button>
-        </div>
+      <div>
+        <UserName ref={this.usernameRef}/>
+        <button onClick={this.focus}>计算</button>
       </div>
     )
   }
