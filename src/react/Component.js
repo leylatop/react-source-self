@@ -23,5 +23,8 @@ export default class Component {
     if(!parentNode) return
     compareTwoVdom(parentNode, oldRenderVdom, newRenderVdom)
     this.oldRenderVdom = newRenderVdom
+    if(this.componentDidUpdate) {
+      this.componentDidUpdate()
+    }
   }
 }

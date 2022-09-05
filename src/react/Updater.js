@@ -48,7 +48,19 @@ export class Updater {
 }
 
 function shouldUpdate(classInstance, nextState) {
+  let willUpdate = true
+  if(classInstance.shouldComponentUpdate && (!classInstance.shouldComponentUpdate())) {
+    willUpdate = false
+  }
+
+  if(willUpdate && classInstance.componentWillUpdate) {
+    classInstance.componentWillUpdate()
+  }
+
   classInstance.state = nextState
-  classInstance.forceUpdate()
+
+  if(willUpdate) {
+    classInstance.forceUpdate()
+  }
 }
 

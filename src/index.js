@@ -4,46 +4,59 @@ import ReactDOM from './react-dom/index'
 // import React from 'react'
 // import ReactDOM from 'react-dom'
 
-// Function components cannot be given refs. 
-// Attempts to access this ref will fail. 
-// Did you mean to use React.forwardRef()
-function UserName(props, ref) {
-  // 如果不想把节点暴露给父组件，避免父组件对节点进行胡乱操作，就创建一个空的ref，然后将真实的ref部分方法暴露给父组件
-  // const inputRef = React.createRef()
-  // const focus = () => {
-  //   inputRef.current.focus()
-  // }
-  // ref.current =  { focus }
-  // return <input ref={inputRef} />
+class Counter extends React.Component {
+	static defaultProps = {
+		name: 'qiaoxiaoxin'
+	}
+	constructor(props) {
+		super(props);
+		this.state = {
+			number: 0
+		}
+		console.log('1.constructor')
+	}
+	componentWillMount() {
+		console.log('2.componentWillMount')
+	}
 
-  const focus = () => {
-    ref.current.focus()
-  }
-  console.log('---ref', ref)
-  return <input ref={ref} onClick={focus}></input>
+	componentDidMount() {
+		console.log('4.componentDidMount')
+	}
+	// 当state更新后发生会调用此方法，或者当父组件传入子组件的属性发生变化后，也会调用此方法
+	/**
+	 * 
+	 * @param {*} nextProps 最新的属性
+	 * @param {*} nextState 最新的状态
+	 * @returns 是否要进行更新
+	 */
+	shouldComponentUpdate(nextProps, nextState) {
+		console.log('5.shouldComponentUpdate')
+    return true
+		// return nextState.number % 2 === 0;	// 判断条件
+	}
+
+	componentWillUpdate(nextProps, nextState) {
+		console.log('6.componentWillUpdate')
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		console.log('7.componentDidUpdate')
+	}
+
+	addCounter = () => {
+		this.setState({ number: this.state.number + 1 })
+	}
+
+	render() {
+		console.log('3.render')
+		return (
+			<div>
+				<p>{this.state.number}</p>
+				<button onClick={this.addCounter}>add</button>
+			</div>
+		)
+	}
 }
 
-const ForwardUserName = React.forwardRef(UserName)
-
-class ClassComponent extends React.Component {
-  usernameRef = React.createRef()
-  focus = (event) => {
-    this.usernameRef.current.focus()
-    // this.usernameRef.current.remove()
-  }
-
-  render() {
-    console.log(<ForwardUserName ref={this.usernameRef}/>)
-    return (
-      <div>
-        <ForwardUserName ref={this.usernameRef}/>
-        <button onClick={this.focus}>计算</button>
-      </div>
-    )
-  }
-}
-
-const ele = <ClassComponent name="xiaoqiao" title="hhh"><span>这是类组件的儿子</span><span>这是类组件的儿子2</span></ClassComponent>
-console.log(ele)
-ReactDOM.render(ele, document.getElementById('root'))
+ReactDOM.render(<Counter />, document.getElementById('root'))
 
