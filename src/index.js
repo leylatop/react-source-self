@@ -31,8 +31,7 @@ class Counter extends React.Component {
 	 */
 	shouldComponentUpdate(nextProps, nextState) {
 		console.log('5.shouldComponentUpdate')
-    return true
-		// return nextState.number % 2 === 0;	// 判断条件
+		return nextState.number % 2 === 0;	// 判断条件
 	}
 
 	componentWillUpdate(nextProps, nextState) {
@@ -52,11 +51,47 @@ class Counter extends React.Component {
 		return (
 			<div>
 				<p>{this.state.number}</p>
+				{this.state.number === 4 ? null : <ChildCounter count={this.state.number}/>}
 				<button onClick={this.addCounter}>add</button>
 			</div>
 		)
 	}
 }
 
+class ChildCounter extends React.Component {
+	static defaultProps = {
+		name: 'childcounter'
+	}
+	componentWillMount() {
+		console.log('1. childcounter componentWillMount')
+	}
+	render() {
+		console.log('2. childcounter render')
+		return(
+			<p className="childCounter">childcounter： {this.props.count}</p>
+		)
+	}
+	componentDidMount() {
+		console.log('3. childcounter componentDidMount')
+	}
+
+	componentWillReceiveProps() {
+		console.log('4. childcounter componentWillReceiveProps')
+	}
+
+	shouldComponentUpdate(nextProps, nextState) {
+		console.log('5. childcounter shouldComponentUpdate')
+		return nextProps.count % 3 === 0;	// 如果是3的倍数才更新，其余的不更新
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		console.log('6. childcounter componentDidUpdate')
+	}
+
+	componentWillUnmount() {
+		console.log('7. childcounter componentWillUnmount')
+	}
+	
+}
 ReactDOM.render(<Counter />, document.getElementById('root'))
 

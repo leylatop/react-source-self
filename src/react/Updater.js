@@ -21,7 +21,8 @@ export class Updater {
     this.emitUpdate()
   }
 
-  emitUpdate = () => {
+  emitUpdate = (newProps) => {
+    this.newProps = newProps
     if(updateQueue.isBatchingUpdate) {
       updateQueue.updaters.add(this)
     } else {
@@ -30,9 +31,9 @@ export class Updater {
   }
 
   updateComponent = () => {
-    const { classInstance, pendingStates } = this
-    if(pendingStates.length > 0) {
-      shouldUpdate(classInstance, this.getState())
+    const { newProps, classInstance, pendingStates } = this
+    if(newProps || pendingStates.length > 0) {
+      shouldUpdate(classInstance, newProps, this.getState())
     }
   }
 
@@ -47,18 +48,22 @@ export class Updater {
   }
 }
 
-function shouldUpdate(classInstance, nextState) {
+function shouldUpdate(classInstance, newProps, nextState) {
   let willUpdate = true
-  if(classInstance.shouldComponentUpdate && (!classInstance.shouldComponentUpdate())) {
+  if(classInstance.shouldComponentUpdate && (!classInstance.shouldComponentUpdate(newProps, nextState))) {
     willUpdate = false
   }
-
   if(willUpdate && classInstance.componentWillUpdate) {
-    classInstance.componentWillUpdate()
+    classInstance.componentWillUpdate(newProps, nextState)
   }
 
-  classInstance.state = nextState
+  // 如果有新属性，则把新属性，放到类实例的props中
+  if(newProps) {
+    classInstance.props = newProps
+  }
 
+  // 无论 shouldComponentUpdate 返回值是 false还是 true， state都会更新，只不过当 shouldComponentUpdate返回值 为true的时候才会真正去更新页面
+  classInstance.state = nextState
   if(willUpdate) {
     classInstance.forceUpdate()
   }

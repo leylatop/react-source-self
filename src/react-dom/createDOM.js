@@ -14,7 +14,7 @@ function createDOM(vdom) {
 	if(type && type.$$typeof === REACT_FORWORD_REF) { // 如果type 的 $$typeof 属性为 REACT_FORWORD_REF，则渲染forward转发的组件
 		return mountForwordComponent(vdom)
 	} else if (type === REACT_TEXT) { // 如果节点是文本节点，就用createTextNode方法创建节点
-		dom = document.createTextNode(props.content);
+		dom = document.createTextNode(props);
 	} else if (typeof type === 'function') { // 函数组件或类组件
 		// 这里直接return真实dom，是因为函数组件的props是传参使用的，没有必要挂载到真实dom上面；也没有儿子
 		// 所以就不需要走下面 updateProps 和reconcileChildren的流程
@@ -53,14 +53,13 @@ function createDOM(vdom) {
 	return dom;
 }
 
-
 /**
  * 根据虚拟dom中的属性，更新真实dom中的属性（设置props 文本、属性、事件、style）
  * @param {*} dom 真实dom
  * @param {*} oldProps 老属性对象
  * @param {*} newProps 新属性对象
  */
-function updateProps(dom, oldProps = {}, newProps = {}) {
+export function updateProps(dom, oldProps = {}, newProps = {}) {
 	for (let key in newProps) {
 		// 外面会单独处理children属性，所以此处先跳过
 		if (key === 'children') {
@@ -88,7 +87,7 @@ function updateProps(dom, oldProps = {}, newProps = {}) {
 	}
 
 	for(let key in oldProps) {
-		if(!newProps.hasOwnProoerty(key)) { // 若老属性在新属性中不存在，则将dom上的老属性删除
+		if(!newProps.hasOwnProperty(key)) { // 若老属性在新属性中不存在，则将dom上的老属性删除
 			dom[key] = null
 		}
 	}
