@@ -1,6 +1,7 @@
 import { REACT_TEXT } from "../react/constants";
 import createDOM, { updateProps } from "./createDOM";
 import { findDOM } from "./findDOM";
+import { MOVE, PLACEMENT } from "./flags";
 
 export function compareTwoVdom(parentNode, oldVdom, newVdom, nextDOM) {
   if (!oldVdom && !newVdom) {
@@ -67,15 +68,77 @@ function updateFunctionComponent(oldVdom, newVdom) {
 }
 
 // 递归更新子节点
-function updateChildren(parentDOM, oldVdomChildren, newVdomChildren) {
-  oldVdomChildren = Array.isArray(oldVdomChildren) ? oldVdomChildren : [oldVdomChildren]
-  newVdomChildren = Array.isArray(newVdomChildren) ? newVdomChildren : [newVdomChildren]
-  let max = Math.max(oldVdomChildren.length, newVdomChildren.length)
-  for(let i = 0; i < max; i++) {
-    // 找到oldvdom中 位于i位置 后面的节点，然后把新的vdom插入到老的节点前面
-    let nextVdom = oldVdomChildren.find((vdom, index) => index > i && findDOM(vdom))
-    compareTwoVdom(parentDOM, oldVdomChildren[i], newVdomChildren[i], nextVdom?.dom)
-  }
+function updateChildren(parentDOM, oldVChildren, newVChildren) {
+  oldVChildren = Array.isArray(oldVChildren) ? oldVChildren : [oldVChildren]
+  newVChildren = Array.isArray(newVChildren) ? newVChildren : [newVChildren]
+  // 若老节点的mountIndex 比 lastPlacedIndex 大，则老节点不需要移动，直接进行复用；否则需要移动元素
+  let lastPlacedIndex = -1 
+  let keyedOldMap = {}
+  // 遍历老节点，将老节点放到map中
+  oldVChildren.forEach((vChild, index) => {
+    const oldKey = vChild.key ? vChild.key : index
+    keyedOldMap[oldKey] = vChild
+  })
+  const patch = []
+  newVChildren.forEach((newVChild, index) => {
+    newVChild.mountIndex = index // 挂载索引
+    const newKey = newVChild.key ? newVChild.key : index
+    let oldVChild = keyedOldMap[newKey]
+    // 找到了此key对应的老节点
+    if(oldVChild) {
+      // 1. 更新能用的节点
+      updateElement(oldVChild, newVChild)
+      // 需要移动元素
+      if(oldVChild.mountIndex < lastPlacedIndex) {
+        patch.push({
+          type: MOVE,
+          oldVChild,
+          newVChild,
+          mountIndex: index // 需要被插入的节点
+        })
+      }
+      delete keyedOldMap[newKey]
+      lastPlacedIndex = Math.max(lastPlacedIndex, oldVChild.mountIndex)
+    } else {
+      patch.push({
+        type: PLACEMENT,
+        newVChild,
+        mountIndex: index
+      })
+    }
+  })
+
+  // 打补丁
+  // 获取需要移动的老节点（将需要移动的老节点删掉，然后在新的地方插入）
+  let moveChildren = patch.filter((action) => action.type === MOVE).map((action) => action.oldVChild)
+  // 没有被复用到的老节点 + 需要移动的老节点，将之删除掉
+  Object.values(keyedOldMap).concat(moveChildren).forEach((oldVChild) => {
+    const currentDOM = findDOM(oldVChild)
+    currentDOM.remove() // 将需要移动的节点从页面上删掉，但是内存中依然存在
+  })
+  
+  patch.forEach((action) => {
+    const {type, oldVChild, newVChild, mountIndex} = action
+    // 删除没有被复用到的老节点和需要移动的老节点之后，真实dom
+    const childrenNodes = parentDOM.childNodes 
+    if(type === PLACEMENT) {
+      let newDOM = createDOM(newVChild)
+      let childNode = childrenNodes[mountIndex]
+      if(childNode) {
+        parentDOM.insertBefore(newDOM, childNode)
+      } else {
+        parentDOM.appendChild(newDOM)
+      }
+    } else {
+      let oldDOM = findDOM(oldVChild) // 在页面中已经被移除掉了，但是内存中依然可以找到
+      let childNode = childrenNodes[mountIndex]
+      if(childNode) {
+        parentDOM.insertBefore(oldDOM, childNode)
+      } else {
+        parentDOM.appendChild(oldDOM)
+      }
+    }
+  })
 }
 
 // 卸载

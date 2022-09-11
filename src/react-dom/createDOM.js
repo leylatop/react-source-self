@@ -36,9 +36,10 @@ function createDOM(vdom) {
 		// 处理儿子 
 		// 如果只有一个儿子，并且儿子是对象
 		if (typeof props.children === 'object' && props.children.type) {
+      props.children.mountIndex = 0
 			mount(props.children, dom); // 把儿子挂载到自己身上
 		} else if (Array.isArray(props.children)) { // 如果是一个数组，就说明有多个儿子，就依次遍历加载
-			renconcileChildren(props.children, dom);
+			reconcileChildren(props.children, dom);
 		}
 	}
 
@@ -94,9 +95,10 @@ export function updateProps(dom, oldProps = {}, newProps = {}) {
 }
 
 // 挂载儿子（儿子是多个）
-function renconcileChildren(childrenVdom, parentVdom) {
+function reconcileChildren(childrenVdom, parentVdom) {
 	for (let i = 0; i < childrenVdom.length; i++) {
 		let childVdom = childrenVdom[i];
+    childVdom.mountIndex = i
 		mount(childVdom, parentVdom)
 	}
 }
