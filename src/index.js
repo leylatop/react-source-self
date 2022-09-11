@@ -16,10 +16,10 @@ class Counter extends React.Component {
 	render() {
     const { list } = this.state
 		return (
-			<div>
+			<React.Fragment>
         <ul>{ list.map((i) => <li key={i}>{i}</li>)}</ul>
 				<button onClick={this.handleClick}>add</button>
-			</div>
+			</React.Fragment>
 		)
 	}
 }

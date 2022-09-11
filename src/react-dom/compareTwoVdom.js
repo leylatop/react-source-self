@@ -1,4 +1,4 @@
-import { REACT_TEXT } from "../react/constants";
+import { REACT_FRAGMENT, REACT_TEXT } from "../react/constants";
 import createDOM, { updateProps } from "./createDOM";
 import { findDOM } from "./findDOM";
 import { MOVE, PLACEMENT } from "./flags";
@@ -30,8 +30,13 @@ export function compareTwoVdom(parentNode, oldVdom, newVdom, nextDOM) {
 
 // dom-diff，更新文本、props、子节点
 function updateElement(oldVdom, newVdom) {
+  // 文档片段
+  if(oldVdom.type === REACT_FRAGMENT) {
+    const currentDOM = newVdom.dom = findDOM(oldVdom)
+    updateChildren(currentDOM, oldVdom.props.children, newVdom.props.children)
+  }
   // 文本类型
-  if(oldVdom.type === REACT_TEXT) {
+  else if(oldVdom.type === REACT_TEXT) {
     let currentDOM = newVdom.dom = findDOM(oldVdom) // 老vdom对应的真实dom
     if(oldVdom.props !== newVdom.props) {
       currentDOM.textContent = newVdom.props

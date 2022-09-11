@@ -1,8 +1,8 @@
-import { REACT_FORWORD_REF } from "./constants";
+import { REACT_FORWARD_REF } from "./constants";
 
 function forwardRef(render) {
   return {
-    $$typeof: REACT_FORWORD_REF,
+    $$typeof: REACT_FORWARD_REF,
     render
   }
 }
