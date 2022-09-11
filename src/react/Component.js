@@ -19,10 +19,10 @@ export default class Component {
   forceUpdate = () => {
     const oldRenderVdom = this.oldRenderVdom
     const newRenderVdom = this.render()
-    const parentNode = findDOM(oldRenderVdom)?.parentNode
+    const oldDOM = findDOM(oldRenderVdom)
     // 文档片段没有parentNode
     // if(!parentNode) return
-    compareTwoVdom(parentNode, oldRenderVdom, newRenderVdom)
+    compareTwoVdom(oldDOM.parentNode, oldRenderVdom, newRenderVdom)
     this.oldRenderVdom = newRenderVdom
     if(this.componentDidUpdate) {
       this.componentDidUpdate()
