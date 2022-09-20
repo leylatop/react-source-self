@@ -18,14 +18,21 @@ export default class Component {
 
   forceUpdate = () => {
     const oldRenderVdom = this.oldRenderVdom
-    const newRenderVdom = this.render()
     const oldDOM = findDOM(oldRenderVdom)
-    // 文档片段没有parentNode
-    // if(!parentNode) return
+    if(this.constructor.getDerivedStateFromProps) {
+      // 将最新的props和老的state结合，父组件传进来的props更新子组件的state
+      let newState = this.constructor.getDerivedStateFromProps(this.props, this.state)
+      if(newState) {
+        this.state = { ...this.state, newState }
+      }
+    }
+
+    const snapshot = this.getSnapshotBeforeUpdate() // 更新前的存一下快照，更新完成后传入 componentDidUpdate
+    const newRenderVdom = this.render()
     compareTwoVdom(oldDOM.parentNode, oldRenderVdom, newRenderVdom)
     this.oldRenderVdom = newRenderVdom
     if(this.componentDidUpdate) {
-      this.componentDidUpdate()
+      this.componentDidUpdate(this.props, this.state, snapshot)
     }
   }
 }
