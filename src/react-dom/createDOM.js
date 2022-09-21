@@ -1,5 +1,5 @@
 import { mount } from "./render";
-import {REACT_FORWARD_REF, REACT_TEXT, REACT_FRAGMENT} from '../react/constants/index'
+import {REACT_FORWARD_REF, REACT_TEXT, REACT_FRAGMENT, REACT_PROVIDER, REACT_CONTEXT} from '../react/constants/index'
 import { addEvent } from './event'
 
 // 创建真实dom，并且返回
@@ -10,7 +10,11 @@ function createDOM(vdom) {
 		ref
 	} = vdom;
 	let dom; // 真实dom
-  if(type === REACT_FRAGMENT) {
+  if(type.$$typeof === REACT_PROVIDER) {
+    return mountProviderComponent(vdom)
+  } else if(type.$$typeof === REACT_CONTEXT) {
+    return mountContextComponent(vdom)
+  } else if(type === REACT_FRAGMENT) {
     dom = document.createDocumentFragment()
   } else if(type && type.$$typeof === REACT_FORWARD_REF) { // 如果type 的 $$typeof 属性为 REACT_FORWARD_REF，则渲染forward转发的组件
 		return mountForwardComponent(vdom)
@@ -115,6 +119,10 @@ function mountFunctionComponent(vdom) {
 function mountClassComponent(vdom) {
   const { type: ClassComponent, props, ref } = vdom
 	const classInstance = new ClassComponent(props)
+  // 类组件兼容context
+  if(ClassComponent.contextType) {
+    classInstance.context = ClassComponent.contextType._currentValue
+  }
 	if(classInstance.componentWillMount) classInstance.componentWillMount()
 	const renderVdom = classInstance.render()
 	// 如果组件上有ref属性，就将实例本身赋给该类组件的ref
@@ -128,16 +136,51 @@ function mountClassComponent(vdom) {
 	return dom
 }
 
-/**
- * 
- * @param {*} vdom 
- * vdom= {
- * type: { $$typeof: REACT_FORWARD_REF, render: FunctionComponent}
- * props: {}
- * ref: {}
- * }
- */
+function mountProviderComponent(vdom) {
+  // Provider vdom 结构
+  // {
+  //   $$typeof: Symbol(react.element)
+  //   key: null
+  //   props: {
+  //    children: {$$typeof: Symbol(react.element), type: 'div', key: null, ref: null, props: {…}, …},
+  //    value: {color: 'black', changeColor: ƒ}
+  //   },
+  //   ref: null
+  //   type: {$$typeof: Symbol(react.provider), _context: {…}, _currentValue}
+  // }
+  const { type, props } = vdom
+  const context = type._context
+  context._currentValue = props.value
+  // Provider 的渲染本质上是直接获取它的儿子的vdom
+  const renderVdom = props.children
+  vdom.oldRenderVdom = renderVdom
+  return createDOM(renderVdom)
+}
+
+function mountContextComponent(vdom) {
+  // Consumer vdom结构
+  // {
+  //   $$typeof: Symbol(react.element)
+  //   key: null
+  //   props: {children:  contextValue => {…}}
+  //   ref: null
+  //   type: {$$typeof: Symbol(react.context), _context: {…}, _calculateChangedBits: null, …}
+  // }
+  const { type, props } = vdom
+  const context = type._context
+  // Consumer 的渲染本质上是调用consumer内部的方法，将contextValue传进去，方法调用结束后得到vdom
+  const renderVdom = props.children(context._currentValue)
+  vdom.oldRenderVdom = renderVdom
+  return createDOM(renderVdom)
+}
+
 function mountForwardComponent(vdom) {
+  // forward vdom结构
+  // {
+  //   type: { $$typeof: REACT_FORWARD_REF, render: FunctionComponent}
+  //   props: {}
+  //   ref: {}
+  // }
 	const { type, props, ref } = vdom
 	const renderVdom = type.render(props, ref) // 调用原函数组件，将props和ref作为参数传递过去
 	// renderVdom结构：

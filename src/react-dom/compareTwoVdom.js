@@ -1,4 +1,4 @@
-import { REACT_FRAGMENT, REACT_TEXT } from "../react/constants";
+import { REACT_CONTEXT, REACT_FRAGMENT, REACT_PROVIDER, REACT_TEXT } from "../react/constants";
 import createDOM, { updateProps } from "./createDOM";
 import { findDOM } from "./findDOM";
 import { MOVE, PLACEMENT } from "./flags";
@@ -30,8 +30,16 @@ export function compareTwoVdom(parentNode, oldVdom, newVdom, nextDOM) {
 
 // dom-diff，更新文本、props、子节点
 function updateElement(oldVdom, newVdom) {
+  // Provider
+  if(oldVdom.type.$$typeof === REACT_PROVIDER) {
+    updateProviderComponent(oldVdom, newVdom)
+  } 
+  // Consumer
+  else if(oldVdom.type.$$typeof === REACT_CONTEXT) {
+    updateContextComponent(oldVdom, newVdom)
+  }
   // 文档片段
-  if(oldVdom.type === REACT_FRAGMENT) {
+  else if(oldVdom.type === REACT_FRAGMENT) {
     const currentDOM = newVdom.dom = findDOM(oldVdom)
     updateChildren(currentDOM, oldVdom.props.children, newVdom.props.children)
   }
@@ -54,12 +62,39 @@ function updateElement(oldVdom, newVdom) {
   }
 }
 
+function updateContextComponent(oldVdom, newVdom) {
+  const currentDOM = findDOM(oldVdom)
+  const parentDOM = currentDOM.parentNode
+  const { type, props } = newVdom
+  // ****** core *************
+  const context = type._context
+  const renderVdom = props.children(context._currentValue)
+  // ****** core *************
+  compareTwoVdom(parentDOM, oldVdom.oldRenderVdom, renderVdom)
+  newVdom.oldRenderVdom = renderVdom
+}
+
+function updateProviderComponent(oldVdom, newVdom) {
+  const currentDOM = findDOM(oldVdom)
+  const parentDOM = currentDOM.parentNode
+  const { type, props } = newVdom
+  // ****** core *************
+  const context = type._context
+  context._currentValue = props.value
+  const renderVdom = props.children
+  // ****** core *************
+  compareTwoVdom(parentDOM, oldVdom.oldRenderVdom, renderVdom)
+  newVdom.oldRenderVdom = renderVdom
+}
+
 function updateClassComponent(oldVdom, newVdom) {
   const classInstance = newVdom.classInstance = oldVdom.classInstance
   if(classInstance.componentWillReceiveProps) {
     classInstance.componentWillReceiveProps(newVdom.props)
   }
-  classInstance.updater.emitUpdate(newVdom.props)
+  // ****** core *************
+  classInstance.updater.emitUpdate(newVdom.props) // 类组件的更新会在forceUpdate中处理
+  // ****** core *************
 }
 
 function updateFunctionComponent(oldVdom, newVdom) {
@@ -67,7 +102,9 @@ function updateFunctionComponent(oldVdom, newVdom) {
   if(!currentDOM) return 
   let parentDOM = currentDOM.parentNode
   const { type, props } = newVdom
+  // ****** core *************
   let newRenderVdom = type(props)
+  // ****** core *************
   compareTwoVdom(parentDOM, oldVdom.oldRenderVdom, newRenderVdom)
   newVdom.oldRenderVdom = newRenderVdom
 }
