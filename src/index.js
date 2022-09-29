@@ -1,98 +1,62 @@
-import React from './react/index'
-import ReactDOM from './react-dom/index'
+import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
+// render-props： 在组件之间使用一个值为函数的props共享代码的简单技术
+// 功能逻辑和子组件拆分
+class MouseTrack extends React.Component {
+  state = { x: 0, y: 0 }
 
-// import React from 'react'
-// import ReactDOM from 'react-dom'
-
-let ThemeContext = React.createContext();
-console.log(ThemeContext);
-const { Provider, Consumer } = ThemeContext;
-let style = { margin: '5px', padding: '5px' };
-function Title(props) {
-  console.log('Title');
-  const  consumer = (
-    <Consumer>
-      {
-        (contextValue) => (
-          <div style={{ ...style, border: `5px solid ${contextValue.color}` }}>
-            Title
-          </div>
-        )
-      }
-    </Consumer>
-  )
-
-  console.log(consumer)
-  return consumer
-}
-class Header extends React.Component {
-  static contextType = ThemeContext
-  render() {
-    console.log('Header');
-    return (
-      <div style={{ ...style, border: `5px solid ${this.context.color}` }}>
-        Header
-        <Title />
-      </div>
-    )
+  handleMouseMove = (event) => {
+    this.setState({
+      x: event.clientX,
+      y: event.clientY,
+    })
   }
-}
-function Content() {
-  console.log('Content');
-  return (
-    <Consumer>
-      {
-        (contextValue) => (
-          <div style={{ ...style, border: `5px solid ${contextValue.color}` }}>
-            Content
-            <button style={{ color: 'red' }} onClick={() => contextValue.changeColor('red')}>变红</button>
-            <button style={{ color: 'green' }} onClick={() => contextValue.changeColor('green')}>变绿</button>
-          </div>
-        )
-      }
-    </Consumer>
-  )
-}
-class Main extends React.Component {
-  static contextType = ThemeContext
-  render() {
-    console.log('Main');
+  render () {
     return (
-      <div style={{ ...style, border: `5px solid ${this.context.color}` }}>
-        Main
-        <Content />
+      <div onMouseMove={this.handleMouseMove}>
+        { this.props.render(this.state)}
       </div>
     )
   }
 }
 
-class Page extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { color: 'black' };
-  }
-  changeColor = (color) => {
-    this.setState({ color });
-  }
-  render() {
+ReactDOM.render(<MouseTrack render={(props) => (
+  <>
+    <h1>移动鼠标</h1>
+    <p>当前鼠标位置是（{props.x}， {props.y}）</p>
+  </>
+)}/>, document.getElementById('root'))
 
-    console.log('Page');
-    let contextValue = { color: this.state.color, changeColor: this.changeColor };
 
-    const providerContainer = (
-      <Provider value={contextValue}>
-        <div style={{ ...style, width: '250px', border: `5px solid ${this.state.color}` }}>
-          Page
-          <Header />
-          <Main />
+// render-props 也可以用hoc表达
+function withTrack(OldComponent) {
+  return class MouseTrack extends React.Component {
+    state = { x: 0, y: 0 }
+  
+    handleMouseMove = (event) => {
+      this.setState({
+        x: event.clientX,
+        y: event.clientY,
+      })
+    }
+    render () {
+      return (
+        <div onMouseMove={this.handleMouseMove}>
+          <OldComponent {...this.state}/>
         </div>
-      </Provider >
-    )
-    console.log(providerContainer)
-    return providerContainer
+      )
+    }
   }
 }
-ReactDOM.render(
-  <Page />,
-  document.getElementById('root')
-);
+
+function ChildrenComponent (props) {
+  return (
+    <>
+      <h1>移动鼠标</h1>
+      <p>当前鼠标位置是（{props.x}， {props.y}）</p>
+    </>
+  )
+}
+const WrapperComponent = withTrack(ChildrenComponent)
+
+// ReactDOM.render(<WrapperComponent />, document.getElementById('root'))
