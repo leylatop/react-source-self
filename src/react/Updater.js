@@ -3,7 +3,7 @@ export let updateQueue = {
   updaters: new Set(),   // 存放setState时的更新实例
   batchUpdate() { // 批量更新
     updateQueue.isBatchingUpdate = false;
-    for(let updater of updateQueue. updaters) {
+    for(let updater of updateQueue.updaters) {
         updater.updateComponent();
     }
     updateQueue.updaters.clear();

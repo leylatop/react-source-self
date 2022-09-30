@@ -111,8 +111,9 @@ function updateFunctionComponent(oldVdom, newVdom) {
 
 // 递归更新子节点
 function updateChildren(parentDOM, oldVChildren, newVChildren) {
-  oldVChildren = Array.isArray(oldVChildren) ? oldVChildren : [oldVChildren]
-  newVChildren = Array.isArray(newVChildren) ? newVChildren : [newVChildren]
+  // filter 过滤掉null
+  oldVChildren = (Array.isArray(oldVChildren) ? oldVChildren : [oldVChildren]).filter(Boolean)
+  newVChildren = (Array.isArray(newVChildren) ? newVChildren : [newVChildren]).filter(Boolean)
   // 若老节点的mountIndex 比 lastPlacedIndex 大，则老节点不需要移动，直接进行复用；否则需要移动元素
   let lastPlacedIndex = -1 
   let keyedOldMap = {}

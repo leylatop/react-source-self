@@ -5,6 +5,7 @@ import forwardRef from './forwardRef'
 import { REACT_FRAGMENT } from './constants'
 import { createContext } from './createContext'
 import { cloneElement } from './cloneElement'
+import { PureComponent } from './PureComponent'
 
 
 const React ={
@@ -14,7 +15,8 @@ const React ={
   Component,
   createContext,
   Fragment: REACT_FRAGMENT,
-  cloneElement
+  cloneElement,
+  PureComponent
 }
 
 export default React
