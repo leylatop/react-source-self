@@ -1,4 +1,4 @@
-import { REACT_CONTEXT, REACT_FRAGMENT, REACT_PROVIDER, REACT_TEXT } from "../react/constants";
+import { REACT_CONTEXT, REACT_FRAGMENT, REACT_MEMO, REACT_PROVIDER, REACT_TEXT } from "../react/constants";
 import createDOM, { updateProps } from "./createDOM";
 import { findDOM } from "./findDOM";
 import { MOVE, PLACEMENT } from "./flags";
@@ -30,8 +30,12 @@ export function compareTwoVdom(parentNode, oldVdom, newVdom, nextDOM) {
 
 // dom-diff，更新文本、props、子节点
 function updateElement(oldVdom, newVdom) {
+  // Memo
+  if(oldVdom.type.$$typeof === REACT_MEMO) {
+    updateMemoComponent(oldVdom, newVdom)
+  }
   // Provider
-  if(oldVdom.type.$$typeof === REACT_PROVIDER) {
+  else if(oldVdom.type.$$typeof === REACT_PROVIDER) {
     updateProviderComponent(oldVdom, newVdom)
   } 
   // Consumer
@@ -59,6 +63,21 @@ function updateElement(oldVdom, newVdom) {
     } else {
       updateFunctionComponent(oldVdom, newVdom)
     }
+  }
+}
+
+function updateMemoComponent(oldVdom, newVdom) {
+  let { type } = oldVdom
+  // 不相等，则需要更新
+  if(!type.compare(oldVdom.props, newVdom.props)) {
+    const oldDOM = findDOM(oldVdom)
+    const parentDOM = oldDOM.parentNode
+    const { type: { type: FunctionComponent }, props } = newVdom
+    const renderVdom = FunctionComponent(props)
+    compareTwoVdom(parentDOM, oldVdom.oldRenderVdom, renderVdom)
+    newVdom.oldRenderVdom = renderVdom
+  } else {
+    newVdom.oldRenderVdom = oldVdom.oldRenderVdom
   }
 }
 

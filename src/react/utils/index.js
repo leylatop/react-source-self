@@ -28,7 +28,6 @@ export function shallowEqual(obj1, obj2) {
   if(keys1.length !== keys2.length) return false
 
   for( let key of keys1) {
-    console.log(obj1[key] !== obj2[key])
     if(!obj2.hasOwnProperty(key) || obj1[key] !== obj2[key]) return false
   }
 

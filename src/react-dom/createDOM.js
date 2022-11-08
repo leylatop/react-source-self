@@ -1,5 +1,5 @@
 import { mount } from "./render";
-import {REACT_FORWARD_REF, REACT_TEXT, REACT_FRAGMENT, REACT_PROVIDER, REACT_CONTEXT} from '../react/constants/index'
+import {REACT_FORWARD_REF, REACT_TEXT, REACT_FRAGMENT, REACT_PROVIDER, REACT_CONTEXT, REACT_MEMO} from '../react/constants/index'
 import { addEvent } from './event'
 
 // 创建真实dom，并且返回
@@ -10,7 +10,9 @@ function createDOM(vdom) {
 		ref
 	} = vdom;
 	let dom; // 真实dom
-  if(type.$$typeof === REACT_PROVIDER) {
+  if(type.$$typeof === REACT_MEMO) {
+    return mountMemoComponent(vdom)
+  } else if(type.$$typeof === REACT_PROVIDER) {
     return mountProviderComponent(vdom)
   } else if(type.$$typeof === REACT_CONTEXT) {
     return mountContextComponent(vdom)
@@ -108,6 +110,18 @@ function reconcileChildren(childrenVdom, parentVdom) {
 	}
 }
 
+function mountMemoComponent(vdom) {
+  // vdom 结构如下
+  // {
+  //   $$type: Symbol(react.element),
+  //   props: {number: 0, children: undefined},
+  //   type: {$$typeof: Symbol(react.memo), type: FunctionComponent, compare: ƒ}
+  // }
+  const { type: {type: FunctionComponent }, props } = vdom
+  const renderVdom = FunctionComponent(props)
+  vdom.oldRenderVdom = renderVdom
+  return createDOM(renderVdom)
+}
 function mountFunctionComponent(vdom) {
   const { type: FunctionComponent, props } = vdom
   const renderVdom = FunctionComponent(props)

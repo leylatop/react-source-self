@@ -1,6 +1,5 @@
 import React from './react/index'
 import ReactDOM from './react-dom/index'
-import createRef from './react/createRef'
 
 // import React, { createRef } from 'react'
 // import * as ReactDOM from 'react-dom';
@@ -13,9 +12,18 @@ class ClassComponent extends React.PureComponent {
     )
   }
 }
+
+function FunctionComponent (props) {
+  console.log('FunctionComponent render')
+  return (
+    <div>FunctionComponent {props.number}</div>
+  )
+}
+
+const MemoFunctionComponent = React.memo(FunctionComponent)
 class ParentComponent extends React.Component {
   state = { number: 0 }
-  inputRef = createRef()
+  inputRef = React.createRef()
 
   handleClickAdd = () => {
     this.setState({number: parseInt(this.inputRef.current.value) + this.state.number })
@@ -24,6 +32,7 @@ class ParentComponent extends React.Component {
     return (
       <div>
         <ClassComponent number={this.state.number}/>
+        <MemoFunctionComponent number={this.state.number}/>
         <input ref={this.inputRef}/>
         <button onClick={this.handleClickAdd}>相加</button>
       </div>
