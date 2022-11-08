@@ -3,41 +3,32 @@ import ReactDOM from './react-dom/index'
 
 // import React, { createRef } from 'react'
 // import * as ReactDOM from 'react-dom';
-class ClassComponent extends React.PureComponent {
-  render() {
-    console.log('ClassComponent render')
+class Dialog extends React.Component {
+  constructor() {
+    super()
+    this.node = document.createElement('div')
+    document.body.appendChild(this.node)
+  }
 
-    return (
-      <div>ClassComponent {this.props.number}</div>
+  componentWillUnmount() {
+    document.body.remove(this.node)
+  }
+
+  render() {
+    return ReactDOM.createPortal(
+    <div className='dialog'>模态框</div>,
+    this.node
     )
   }
 }
-
-function FunctionComponent (props) {
-  console.log('FunctionComponent render')
-  return (
-    <div>FunctionComponent {props.number}</div>
-  )
-}
-
-const MemoFunctionComponent = React.memo(FunctionComponent)
-class ParentComponent extends React.Component {
-  state = { number: 0 }
-  inputRef = React.createRef()
-
-  handleClickAdd = () => {
-    this.setState({number: parseInt(this.inputRef.current.value) + this.state.number })
-  }
+class App extends React.Component {
   render () {
     return (
       <div>
-        <ClassComponent number={this.state.number}/>
-        <MemoFunctionComponent number={this.state.number}/>
-        <input ref={this.inputRef}/>
-        <button onClick={this.handleClickAdd}>相加</button>
+        <Dialog />
       </div>
     )
   }
 }
 
-ReactDOM.render(<ParentComponent />, document.getElementById('root'))
+ReactDOM.render(<App />, document.getElementById('root'))

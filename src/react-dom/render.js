@@ -18,6 +18,7 @@ function render(vdom, container) {
 function mount(vdom, container) {
   // 1. 根据虚拟dom转化成真实dom
   const dom = createDOM(vdom);
+  if(!dom) return
   // 2. 将真实dom添加到容器中去
   container.appendChild(dom)
 }

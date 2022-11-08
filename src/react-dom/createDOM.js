@@ -119,12 +119,14 @@ function mountMemoComponent(vdom) {
   // }
   const { type: {type: FunctionComponent }, props } = vdom
   const renderVdom = FunctionComponent(props)
+  if(!renderVdom) return
   vdom.oldRenderVdom = renderVdom
   return createDOM(renderVdom)
 }
 function mountFunctionComponent(vdom) {
   const { type: FunctionComponent, props } = vdom
   const renderVdom = FunctionComponent(props)
+  if(!renderVdom) return
 	// 把本次的renderVdom放到vdom上
 	vdom.oldRenderVdom = renderVdom
   return createDOM(renderVdom)
@@ -139,6 +141,7 @@ function mountClassComponent(vdom) {
   }
 	if(classInstance.componentWillMount) classInstance.componentWillMount()
 	const renderVdom = classInstance.render()
+  if(!renderVdom) return
 	// 如果组件上有ref属性，就将实例本身赋给该类组件的ref
 	if(ref) ref.current = classInstance
 
@@ -167,6 +170,7 @@ function mountProviderComponent(vdom) {
   context._currentValue = props.value
   // Provider 的渲染本质上是直接获取它的儿子的vdom
   const renderVdom = props.children
+  if(!renderVdom) return
   vdom.oldRenderVdom = renderVdom
   return createDOM(renderVdom)
 }
@@ -184,6 +188,8 @@ function mountContextComponent(vdom) {
   const context = type._context
   // Consumer 的渲染本质上是调用consumer内部的方法，将contextValue传进去，方法调用结束后得到vdom
   const renderVdom = props.children(context._currentValue)
+  if(!renderVdom) return
+
   vdom.oldRenderVdom = renderVdom
   return createDOM(renderVdom)
 }
@@ -197,6 +203,7 @@ function mountForwardComponent(vdom) {
   // }
 	const { type, props, ref } = vdom
 	const renderVdom = type.render(props, ref) // 调用原函数组件，将props和ref作为参数传递过去
+  if(!renderVdom) return
 	// renderVdom结构：
 	// $$type: Symbol(react.element)
 	// key: undefined

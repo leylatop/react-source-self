@@ -1,7 +1,8 @@
 import { render } from './render'
 
 const ReactDOM = {
-  render
+  render,
+  createPortal: render
 }
 
 export default ReactDOM
