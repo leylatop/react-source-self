@@ -1,4 +1,7 @@
+import { compareTwoVdom } from './compareTwoVdom'
 import createDOM from './createDOM'
+let scheduleUpdate
+let scheduleUpdated = false
 /**
  * 虚拟dom结构
  * {
@@ -12,6 +15,16 @@ import createDOM from './createDOM'
 // 把虚拟dom转化成真实dom并且插入到容器中
 function render(vdom, container) {
   mount(vdom, container)
+  scheduleUpdate = (callback) => {
+    if(!scheduleUpdated) {
+      scheduleUpdated = true
+      queueMicrotask(() => {
+        scheduleUpdated = false
+        callback()
+        compareTwoVdom(container, vdom, vdom)
+      })
+    }
+  }
 }
 
 // 渲染
@@ -25,5 +38,6 @@ function mount(vdom, container) {
 
 export {
   render,
-  mount
+  mount,
+  scheduleUpdate
 }
