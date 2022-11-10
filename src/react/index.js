@@ -7,6 +7,7 @@ import { createContext } from './createContext'
 import { cloneElement } from './cloneElement'
 import { PureComponent } from './PureComponent'
 import memo from './memo'
+import * as hook from './hook'
 
 
 const React ={
@@ -18,7 +19,8 @@ const React ={
   Fragment: REACT_FRAGMENT,
   cloneElement,
   PureComponent,
-  memo
+  memo,
+  ...hook
 }
 
 export default React
